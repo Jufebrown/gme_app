@@ -5,14 +5,15 @@ defmodule GmeApp.Market do
 
   @trading_days_ago 1
 
-  def get_recent_quote(symbol) do
-    from(q in Quote,
-      where: q.symbol == ^symbol and q.date >= ^Date.utc_today() |> Date.add(-@trading_days_ago),
-      limit: 1
-    )
-    |> Repo.one()
-  end
+  def get_recent_quotes do
+    cutoff_date = Date.add(Date.utc_today(), -@trading_days_ago)
 
+    from(q in Quote,
+      where: q.date >= ^cutoff_date
+    )
+    |> Repo.all()
+  end
+  
   def get_all_quotes(symbol) do
     from(q in Quote, where: q.symbol == ^symbol, order_by: q.date)
     |> Repo.all()
