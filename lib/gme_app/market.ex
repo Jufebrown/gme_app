@@ -1,104 +1,49 @@
 defmodule GmeApp.Market do
-  @moduledoc """
-  The Market context.
-  """
-
-  import Ecto.Query, warn: false
+  import Ecto.Query
   alias GmeApp.Repo
-
   alias GmeApp.Market.Quote
 
-  @doc """
-  Returns the list of quotes.
+  @trading_days_ago 1
 
-  ## Examples
-
-      iex> list_quotes()
-      [%Quote{}, ...]
-
-  """
-  def list_quotes do
-    Repo.all(Quote)
+  def get_recent_quote(symbol) do
+    from(q in Quote,
+      where: q.symbol == ^symbol and q.date >= ^Date.utc_today() |> Date.add(-@trading_days_ago),
+      limit: 1
+    )
+    |> Repo.one()
   end
 
-  @doc """
-  Gets a single quote.
-
-  Raises `Ecto.NoResultsError` if the Quote does not exist.
-
-  ## Examples
-
-      iex> get_quote!(123)
-      %Quote{}
-
-      iex> get_quote!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_quote!(id), do: Repo.get!(Quote, id)
-
-  @doc """
-  Creates a quote.
-
-  ## Examples
-
-      iex> create_quote(%{field: value})
-      {:ok, %Quote{}}
-
-      iex> create_quote(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_quote(attrs \\ %{}) do
-    %Quote{}
-    |> Quote.changeset(attrs)
-    |> Repo.insert()
+  def get_all_quotes(symbol) do
+    from(q in Quote, where: q.symbol == ^symbol, order_by: q.date)
+    |> Repo.all()
   end
 
-  @doc """
-  Updates a quote.
+  def fetch_from_alpha_vantage(symbol) do
+    api_key = System.get_env("ALPHA_VANTAGE_API_KEY")
+    url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=#{symbol}&apikey=#{api_key}"
 
-  ## Examples
+    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <- HTTPoison.get(url),
+         {:ok, decoded} <- Jason.decode(body),
+         %{"Time Series (Daily)" => series} <- decoded do
 
-      iex> update_quote(quote, %{field: new_value})
-      {:ok, %Quote{}}
+      entries =
+        series
+        |> Enum.map(fn {date, data} ->
+          %{
+            symbol: symbol,
+            date: Date.from_iso8601!(date),
+            open: String.to_float(data["1. open"]),
+            high: String.to_float(data["2. high"]),
+            low: String.to_float(data["3. low"]),
+            close: String.to_float(data["4. close"]),
+            volume: String.to_integer(data["5. volume"])
+          }
+        end)
 
-      iex> update_quote(quote, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_quote(%Quote{} = quote, attrs) do
-    quote
-    |> Quote.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a quote.
-
-  ## Examples
-
-      iex> delete_quote(quote)
-      {:ok, %Quote{}}
-
-      iex> delete_quote(quote)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_quote(%Quote{} = quote) do
-    Repo.delete(quote)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking quote changes.
-
-  ## Examples
-
-      iex> change_quote(quote)
-      %Ecto.Changeset{data: %Quote{}}
-
-  """
-  def change_quote(%Quote{} = quote, attrs \\ %{}) do
-    Quote.changeset(quote, attrs)
+      Repo.insert_all(Quote, entries, on_conflict: :nothing)
+      entries
+    else
+      _ -> []
+    end
   end
 end
