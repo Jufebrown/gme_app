@@ -53,4 +53,5 @@ defmodule GmeAppWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
   plug GmeAppWeb.Router
+
 end
