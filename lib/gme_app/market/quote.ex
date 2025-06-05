@@ -3,21 +3,15 @@ defmodule GmeApp.Market.Quote do
   import Ecto.Changeset
 
   schema "quotes" do
-    field :close, :float
-    field :high, :float
-    field :low, :float
-    field :open, :float
     field :date, :date
-    field :symbol, :string
-    field :volume, :integer
-
-    timestamps(type: :utc_datetime)
+    field :close, :float
+    timestamps()
   end
 
-  @doc false
   def changeset(quote, attrs) do
     quote
-    |> cast(attrs, [:symbol, :date, :open, :high, :low, :close, :volume])
-    |> validate_required([:symbol, :date, :open, :high, :low, :close, :volume])
+    |> cast(attrs, [:date, :close])
+    |> validate_required([:date, :close])
+    |> unique_constraint(:date)
   end
 end
