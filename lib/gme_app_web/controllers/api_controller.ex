@@ -4,8 +4,7 @@ defmodule GmeAppWeb.ApiController do
   alias GmeApp.Market.AlphaVantage
 
   def gme(conn, _params) do
-    # data = Market.get_recent_quotes()
-    data = {data:[2023-10-01, 150.0], [2023-10-02, 155.0], [2023-10-03, 160.0]} # Placeholder for testing
+    data = Market.get_recent_quotes()
 
     quotes =
       if data == [] do
