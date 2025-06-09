@@ -16,13 +16,13 @@ defmodule GmeApp.Market do
   end
 
   def insert_quotes(quotes) do
-    Enum.each(quotes, fn %{date: date, close: close} ->
+    quotes
+    |> Enum.map(fn %{date: date, close: close} ->
       %Quote{}
       |> Quote.changeset(%{date: date, close: close})
       |> Repo.insert(on_conflict: :nothing)
     end)
-
-    IO.puts("Inserted #{length(quotes)} quotes")
+    |> Enum.count(fn result -> match?({:ok, _}, result) end)
   end
 
 end
