@@ -6,7 +6,10 @@ defmodule GmeAppWeb.Router do
   end
 
   scope "/api", GmeAppWeb do
+    pipe_through :api
+
     get "/gme", ApiController, :gme
+    post "/gme", ApiController, :gme_post
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
