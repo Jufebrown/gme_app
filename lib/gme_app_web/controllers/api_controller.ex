@@ -19,11 +19,26 @@ defmodule GmeAppWeb.ApiController do
   def gme_post(conn, %{"quotes" => quotes}) do
     saved =
       quotes
-      |> Enum.map(fn %{"time" => date, "value" => close} ->
-        %{date: Date.from_iso8601!(date), close: close}
+      |> Enum.map(fn %{
+                      "time" => date,
+                      "open" => open,
+                      "high" => high,
+                      "low" => low,
+                      "value" => close,
+                      "volume" => volume
+                    } ->
+        %{
+          date: Date.from_iso8601!(date),
+          open: open,
+          high: high,
+          low: low,
+          close: close,
+          volume: volume
+        }
       end)
       |> GmeApp.Market.insert_quotes()
 
     json(conn, %{inserted: saved})
   end
+
 end
