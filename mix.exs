@@ -36,6 +36,7 @@ defmodule GmeApp.MixProject do
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
+      {:dotenvy, "~> 0.6.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
