@@ -21,5 +21,8 @@ defmodule GmeApp.Market do
       |> Quote.changeset(%{date: date, close: close})
       |> Repo.insert(on_conflict: :nothing)
     end)
+
+    IO.puts("Inserted #{length(quotes)} quotes")
   end
+
 end
