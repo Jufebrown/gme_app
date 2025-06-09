@@ -1,15 +1,18 @@
 defmodule GmeAppWeb.ApiController do
   use GmeAppWeb, :controller
-  alias GmeApp.Market
 
   def gme(conn, _params) do
-    quotes = Market.get_recent_quotes()
+    quotes = GmeApp.Market.get_all_quotes()
 
     result =
-      Enum.map(quotes, fn %{date: d, close: c} ->
+      Enum.map(quotes, fn quote ->
         %{
-          time: Date.to_iso8601(d),
-          value: c
+          time: Date.to_iso8601(quote.date),
+          open: quote.open,
+          high: quote.high,
+          low: quote.low,
+          close: quote.close,
+          volume: quote.volume
         }
       end)
 
@@ -38,7 +41,6 @@ defmodule GmeAppWeb.ApiController do
       end)
       |> GmeApp.Market.insert_quotes()
 
-    json(conn, %{inserted: saved})
+    json(conn, %{status: "ok"})
   end
-
 end

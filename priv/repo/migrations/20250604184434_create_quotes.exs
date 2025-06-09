@@ -3,7 +3,6 @@ defmodule GmeApp.Repo.Migrations.CreateQuotes do
 
   def change do
     create table(:quotes) do
-      add :symbol, :string
       add :date, :date
       add :open, :float
       add :high, :float
@@ -13,5 +12,6 @@ defmodule GmeApp.Repo.Migrations.CreateQuotes do
 
       timestamps(type: :utc_datetime)
     end
+    create unique_index(:quotes, [:date])
   end
 end

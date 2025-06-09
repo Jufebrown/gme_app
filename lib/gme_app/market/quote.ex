@@ -13,7 +13,7 @@ defmodule GmeApp.Market.Quote do
     timestamps()
   end
 
-  @required ~w(date open high low close volume)a
+  @required ~w(date open high low close)a
 
   def changeset(quote, attrs) do
     quote
