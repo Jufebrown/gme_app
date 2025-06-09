@@ -4,14 +4,20 @@ defmodule GmeApp.Market.Quote do
 
   schema "quotes" do
     field :date, :date
+    field :open, :float
+    field :high, :float
+    field :low, :float
     field :close, :float
+    field :volume, :integer
+
     timestamps()
   end
 
+  @required ~w(date open high low close volume)a
+
   def changeset(quote, attrs) do
     quote
-    |> cast(attrs, [:date, :close])
-    |> validate_required([:date, :close])
-    |> unique_constraint(:date)
+    |> cast(attrs, @required)
+    |> validate_required(@required)
   end
 end
