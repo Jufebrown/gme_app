@@ -24,7 +24,7 @@ defmodule GmeAppWeb.ApiController do
                       "open" => open,
                       "high" => high,
                       "low" => low,
-                      "value" => close,
+                      "close" => close,
                       "volume" => volume
                     } ->
         %{
