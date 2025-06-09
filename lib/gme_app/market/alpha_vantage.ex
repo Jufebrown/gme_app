@@ -4,19 +4,38 @@ defmodule GmeApp.Market.AlphaVantage do
   @url "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=#{@symbol}&apikey=#{@api_key}"
 
   def fetch_daily_quotes do
-    case HTTPoison.get(@url) do
-      {:ok, %{body: body}} ->
-        body
-        |> Jason.decode!()
-        |> Map.get("Time Series (Daily)", %{})
-        |> Enum.map(fn {date, data} ->
-          %{
-            date: Date.from_iso8601!(date),
-            close: String.to_float(data["4. close"])
-          }
-        end)
+  IO.puts("Calling Alpha Vantage...")
+  IO.puts(@url)
 
-      _ -> []
-    end
+  case HTTPoison.get(@url) do
+    {:ok, %{body: body}} ->
+      IO.puts("Got response")
+      case Jason.decode(body) do
+        {:ok, decoded} ->
+          IO.inspect(decoded, label: "Decoded JSON")
+
+          case Map.get(decoded, "Time Series (Daily)") do
+            nil -> 
+              IO.puts("Missing time series data")
+              []
+            ts ->
+              Enum.map(ts, fn {date, data} ->
+                %{
+                  date: Date.from_iso8601!(date),
+                  close: String.to_float(data["4. close"])
+                }
+              end)
+          end
+
+        {:error, err} ->
+          IO.inspect(err, label: "JSON Decode Error")
+          []
+      end
+
+    {:error, err} ->
+      IO.inspect(err, label: "HTTP Error")
+      []
+  end
+
   end
 end
